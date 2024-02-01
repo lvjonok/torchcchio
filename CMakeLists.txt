@@ -1,46 +1,23 @@
-cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
-project(torchcchio)
+cmake_minimum_required(VERSION 3.1)
 
-find_package(Torch REQUIRED)
+set(PROJECT_NAME torchcchio)
+set(PROJECT_DESCRIPTION
+        "Example of pinocchio usage with torch")
+set(PROJECT_URL "http://github.com/lvjonok/torchcchio")
+
+project(${PROJECT_NAME} LANGUAGES CXX)
+
+# pinocchio dependency
 find_package(pinocchio REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+# torch dependency
+find_package(Torch REQUIRED)
+set(CMAKE_CXX_FLAGS "${TORCH_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
 
-# include_directories(
-#   # /home/leo/github.com/lvjonok/torchcchio/venv/lib/python3.10/site-packages/cmeel.prefix/include
-#   /home/leo/github.com/lvjonok/torchcchio/venv/lib/python3.10/site-packages/cmeel.prefix/include/eigen3
-#   # ${EIGEN3_INCLUDE_DIR}
-#   ${PINOCCHIO_INCLUDE_DIRS}
-# )
+# Create the main executable
+add_executable(main main.cpp)
 
-# # add_executable(
-# #   invdyn
-# #   invdyn.cpp
-# #   ${${PROJECT_NAME}_HEADERS}
-# # )
-# # TARGET_LINK_LIBRARIES(${EXAMPLE_NAME} PUBLIC ${PROJECT_NAME})
-# add_executable(invdyn invdyn.cpp ${${PROJECT_NAME}_HEADERS})
-# target_link_libraries(invdyn PUBLIC "${TORCH_LIBRARIES}" ${PINOCCHIO_LIBRARIES})
-# set_property(TARGET invdyn PROPERTY CXX_STANDARD 17)
+# Link main to its dependencies
+target_link_libraries(main PUBLIC "${TORCH_LIBRARIES}" pinocchio::pinocchio)
 
-# # target_link_libraries(
-#   # ${PY_NAME}
-#   # PRIVATE
-#   # casadi
-#   # ${casadi_LIBRARIES}
-#   # ${PINOCCHIO_LIBRARIES}
-
-add_executable(example-app example-app.cpp)
-target_link_libraries(example-app "${TORCH_LIBRARIES}")
-set_property(TARGET example-app PROPERTY CXX_STANDARD 17)
-
-# The following code block is suggested to be used on Windows.
-# According to https://github.com/pytorch/pytorch/issues/25457,
-# the DLLs need to be copied to avoid memory errors.
-if (MSVC)
-  file(GLOB TORCH_DLLS "${TORCH_INSTALL_PREFIX}/lib/*.dll")
-  add_custom_command(TARGET example-app
-                     POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                     ${TORCH_DLLS}
-                     $<TARGET_FILE_DIR:example-app>)
-endif (MSVC)
+##cmake -DCMAKE_PREFIX_PATH=`python3 -c 'import torch;print(torch.utils.cmake_prefix_path)';$(python3 -m cmeel cmake)` -DPINOCCHIO_WITH_URDFDOM=TRUE ..
+##export CMAKE_PREFIX_PATH=$(python3 -c 'import torch;print(torch.utils.cmake_prefix_path)'):$(python3 -m cmeel cmake)
